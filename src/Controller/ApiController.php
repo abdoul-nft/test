@@ -12,7 +12,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use JMS\Serializer\SerializerBuilder;;
+use JMS\Serializer\SerializerBuilder;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\Controller\Annotations\View;
+
+
 
 class ApiController extends AbstractController
 {
@@ -21,14 +25,14 @@ class ApiController extends AbstractController
      */
     public function index(ParameterBagInterface $params, EntityManagerInterface $em, PokemonRepository $repository)
     {
-        //$serialize = SerializerBuilder::create()->build();
+        $serializer = SerializerBuilder::create()->build();
         $serializer = new Serializer([new ObjectNormalizer()], [new CsvEncoder()]);
         $data = $serializer->decode(file_get_contents($params->get('directory')."/file/pokemon.csv"), 'csv');
         //Enregistrer les data en bdd 
         $this->setDatabase($data, $em, $repository);
         $pokemons = $repository->findAll();
         if($pokemons){
-            return new JsonResponse($data, 200, [], false);
+            return new JsonResponse($data, 201, [], false);
         }
         return new JsonResponse('Une erreur s\'est produite !!', 404, [], false);
         
